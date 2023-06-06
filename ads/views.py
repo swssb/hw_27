@@ -141,7 +141,6 @@ class AdCreateView(CreateView):
             "author": ad.author_id,
             "price": ad.price,
             "description": ad.description,
-            "image": ad.image.url,
             "is_published": ad.is_published,
             "category": ad.category_id
         }, status=200)
@@ -183,3 +182,18 @@ class AdDeleteView(DeleteView):
         super().delete(request, *args, **kwargs)
 
         return JsonResponse({"status": "ok"}, status=200)
+
+@method_decorator(csrf_exempt, name='dispatch')
+class AdImageView(UpdateView):
+    model = Ad
+    fields = ["name", "image"]
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.object.image = request.FILES.get("image", None)
+        self.object.save()
+        return JsonResponse({
+            "id": self.object.id,
+            "name": self.object.name,
+            "image": self.object.image.url
+        })
