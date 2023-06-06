@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
 from ads.models import Category, Ad
+from hw_27.settings import TOTAL_ON_PAGE
 
 
 def index(request):
@@ -84,9 +85,18 @@ class AdListView(ListView):
 
     def get(self, request, *args, **kwargs):
         super().get(request, *args, **kwargs)
-        response = []
+        total_ads = self.object_list.count()
+        page = int(request.GET.get("page", 0))
+        offset = page * TOTAL_ON_PAGE
+        if offset > total_ads:
+            self.object_list = []
+        elif offset:
+            self.object_list = self.object_list[offset:offset + TOTAL_ON_PAGE]
+        else:
+            self.object_list = self.object_list[:TOTAL_ON_PAGE]
+        ads = []
         for ad in self.object_list:
-            response.append(
+            ads.append(
                 {
                     "id": ad.id,
                     "name": ad.name,
@@ -98,6 +108,11 @@ class AdListView(ListView):
                     "category": ad.category_id
                 }
             )
+        response = {
+            "items": ads,
+            "total": total_ads,
+            "num_pages": TOTAL_ON_PAGE,
+        }
         return JsonResponse(response, safe=False, status=200)
 
 
@@ -195,5 +210,9 @@ class AdImageView(UpdateView):
         return JsonResponse({
             "id": self.object.id,
             "name": self.object.name,
+            "author": self.object.author_id,
+            "price": self.object.price,
+            "description": self.object.description,
+            "category": self.object.category_id,
             "image": self.object.image.url
-        })
+        }, status=200)
