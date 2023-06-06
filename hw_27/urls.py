@@ -25,6 +25,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", ads.views.index),
     path("", include("ads.urls")),
+    path("", include("users.urls"))
 
 ]
 if settings.DEBUG:
