@@ -3,6 +3,7 @@ import json
 from django.core.paginator import Paginator
 from django.db import IntegrityError
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
@@ -97,6 +98,7 @@ class AdListView(ListView):
         #     self.object_list = self.object_list.order_by('-price')[:TOTAL_ON_PAGE]
         paginator = Paginator(self.object_list, TOTAL_ON_PAGE)
         page_obj = paginator.get_page(page)
+
         ads = []
         for ad in page_obj:
             ads.append(
