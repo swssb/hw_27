@@ -1,6 +1,6 @@
 import json
 
-from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
 from django.db import IntegrityError
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
@@ -22,7 +22,7 @@ class CategoryListView(ListView):
     def get(self, request, *args, **kwargs):
         super().get(request, *args, **kwargs)
         response = []
-        for category in self.object_list:
+        for category in self.object_list.order_by('name'):
             response.append(
                 {
                     "id": category.id,
@@ -86,16 +86,19 @@ class AdListView(ListView):
     def get(self, request, *args, **kwargs):
         super().get(request, *args, **kwargs)
         total_ads = self.object_list.count()
-        page = int(request.GET.get("page", 0))
-        offset = page * TOTAL_ON_PAGE
-        if offset > total_ads:
-            self.object_list = []
-        elif offset:
-            self.object_list = self.object_list[offset:offset + TOTAL_ON_PAGE]
-        else:
-            self.object_list = self.object_list[:TOTAL_ON_PAGE]
+        page = request.GET.get("page")
+        self.object_list = self.object_list.order_by('price')
+        # offset = page * TOTAL_ON_PAGE
+        # if offset > total_ads:
+        #     self.object_list = []
+        # elif offset:
+        #     self.object_list = self.object_list.order_by('-price')[offset:offset + TOTAL_ON_PAGE]
+        # else:
+        #     self.object_list = self.object_list.order_by('-price')[:TOTAL_ON_PAGE]
+        paginator = Paginator(self.object_list, TOTAL_ON_PAGE)
+        page_obj = paginator.get_page(page)
         ads = []
-        for ad in self.object_list:
+        for ad in page_obj:
             ads.append(
                 {
                     "id": ad.id,
@@ -110,8 +113,8 @@ class AdListView(ListView):
             )
         response = {
             "items": ads,
-            "total": total_ads,
-            "num_pages": TOTAL_ON_PAGE,
+            "total": paginator.count,
+            "num_pages": paginator.num_pages,
         }
         return JsonResponse(response, safe=False, status=200)
 
@@ -121,10 +124,7 @@ class AdDetailView(DetailView):
 
     def get(self, request, *args, **kwargs):
         super().get(request, *args, **kwargs)
-        try:
-            ad = self.get_object()
-        except Ad.DoesNotExist:
-            return JsonResponse({"error": "page not found"}, status=404)
+        ad = self.get_object()
         return JsonResponse(
             {
                 "id": ad.id,
@@ -197,6 +197,7 @@ class AdDeleteView(DeleteView):
         super().delete(request, *args, **kwargs)
 
         return JsonResponse({"status": "ok"}, status=200)
+
 
 @method_decorator(csrf_exempt, name='dispatch')
 class AdImageView(UpdateView):

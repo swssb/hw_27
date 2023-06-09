@@ -9,6 +9,8 @@ CSV_LOCATION = 'datasets/location.csv'
 JSON_LOCATION = 'datasets/location.json'
 CSV_USER = "datasets/user.csv"
 JSON_USER = 'datasets/user.json'
+
+
 def convert_file(csv_file, model_name, json_file) -> None:
     result = []
     with open(csv_file, encoding='utf-8') as csv_file:
@@ -57,7 +59,6 @@ def convert_file(csv_file, model_name, json_file) -> None:
                 result.append(to_add)
             with open(json_file, 'w', encoding='utf-8') as json_file:
                 json.dump(result, json_file, indent=2, ensure_ascii=False)
-
 
 
 print(convert_file(CSV_ADS, "ads.ad", JSON_ADS))
