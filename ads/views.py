@@ -2,13 +2,15 @@ import json
 
 from django.core.paginator import Paginator
 from django.db import IntegrityError
+from django.db.models import Q
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from rest_framework.generics import ListAPIView
 
 from ads.models import Category, Ad
+from ads.serializers import AdListSerializer
 from hw_27.settings import TOTAL_ON_PAGE
 
 
@@ -219,3 +221,32 @@ class AdImageView(UpdateView):
             "category": self.object.category_id,
             "image": self.object.image.url
         }, status=200)
+
+
+class AdSearchView(ListAPIView):
+    queryset = Ad.objects.all()
+    serializer_class = AdListSerializer
+
+    def get(self, request, *args, **kwargs):
+        categories = request.GET.getlist('cat', None)
+        text = request.GET.get("text", None)
+        location = request.GET.get('location', None)
+        price_from = request.GET.get('price_from', None)
+        price_to = request.GET.get('price_to', None)
+
+        if categories:
+            cat_q = None
+            for cat in categories:
+                if cat_q is None:
+                    cat_q = Q(category__id=cat)
+                else:
+                    cat_q |= Q(category__id=cat)
+            if cat_q:
+                self.queryset = self.queryset.filter(cat_q)
+        elif text:
+            self.queryset = self.queryset.filter(name__icontains=text)
+        elif location:
+            self.queryset = self.queryset.filter(author__location__name__icontains=location)
+        elif price_from and price_to:
+            self.queryset = self.queryset.filter(price__range=(price_from, price_to))
+        return super().get(request, *args, **kwargs)
