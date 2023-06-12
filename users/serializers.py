@@ -4,11 +4,21 @@ from users.models import User, Location
 
 
 class UserListSerializer(serializers.ModelSerializer):
+    location = serializers.SlugRelatedField(
+        required=False,
+        queryset=Location.objects.all(),
+        slug_field='name'
+    )
     class Meta:
         model = User
         exclude = ['password']
 
 class UserRetrieveSerializer(serializers.ModelSerializer):
+    location = serializers.SlugRelatedField(
+        required=False,
+        queryset=Location.objects.all(),
+        slug_field='name'
+    )
     class Meta:
         model = User
         exclude = ['password']
