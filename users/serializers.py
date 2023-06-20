@@ -2,6 +2,9 @@ from rest_framework import serializers
 
 from users.models import User, Location
 
+def email_validation(value):
+    if User.objects.filter(email__endswith="@rambler.ru"):
+        raise serializers.ValidationError("Not supported email on @rambler.ru")
 
 class UserSerializer(serializers.ModelSerializer):
     location = serializers.SlugRelatedField(
@@ -16,6 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(validators=[email_validation])
     class Meta:
         model = User
         fields = '__all__'

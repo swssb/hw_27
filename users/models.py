@@ -1,5 +1,14 @@
+import datetime
+
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 from django.db import models
+
+
+
+def birth_validation(value):
+    if (datetime.now().date() - value).days() // 365 <= 9:
+        raise ValidationError("Age of user cant be lower than 9")
 
 
 class Location(models.Model):
@@ -30,6 +39,8 @@ class User(AbstractUser):
     role = models.CharField(max_length=30, choices=ROLES, default='member')
     age = models.PositiveIntegerField()
     location = models.ForeignKey(Location, on_delete=models.CASCADE)
+    birth_date = models.DateField(validators=[birth_validation])
+    email = models.EmailField(unique=True)
 
     class Meta:
         verbose_name = "Пользователь"
