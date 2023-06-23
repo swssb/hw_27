@@ -1,14 +1,18 @@
-import datetime
+from datetime import date
 
+from dateutil.relativedelta import relativedelta
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
 
+USER_MIN_AGE = 9
+EMAIL_DOMAINS = ["rambler.ru"]
 
 
 def birth_validation(value):
-    if (datetime.now().date() - value).days() // 365 <= 9:
-        raise ValidationError("Age of user cant be lower than 9")
+    difference = relativedelta(date.today(), value).years
+    if difference < USER_MIN_AGE:
+        raise ValidationError(f"User age must be older than {USER_MIN_AGE}")
 
 
 class Location(models.Model):
@@ -37,8 +41,8 @@ class User(AbstractUser):
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30, null=True, blank=True)
     role = models.CharField(max_length=30, choices=ROLES, default='member')
-    age = models.PositiveIntegerField()
-    location = models.ForeignKey(Location, on_delete=models.CASCADE)
+    age = models.PositiveIntegerField(null=True, blank=True)
+    location = models.ForeignKey(Location, null=True, on_delete=models.CASCADE)
     birth_date = models.DateField(validators=[birth_validation])
     email = models.EmailField(unique=True)
 

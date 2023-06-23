@@ -1,18 +1,16 @@
-import json
-
-from django.db import IntegrityError
 from django.db.models import Q
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import UpdateView
 from rest_framework.generics import ListAPIView, RetrieveAPIView, UpdateAPIView, DestroyAPIView, CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 
 from ads.models import Category, Ad, Selection
 from ads.permissions import AdChangePermission, SelectionChangePermission
 from ads.serializers import AdListSerializer, AdUpdateSerializer, AdCreateSerializer, \
-    SelectionCreateSerializer, SelectionListSerializer, SelectionRetrieveSerializer
+    SelectionCreateSerializer, SelectionListSerializer, SelectionRetrieveSerializer, CategorySerializer, \
+    CategoryUpdateSerializer
 
 
 # class AdListView(ListView):
@@ -126,73 +124,98 @@ from ads.serializers import AdListSerializer, AdUpdateSerializer, AdCreateSerial
 #         super().delete(request, *args, **kwargs)
 #
 #         return JsonResponse({"status": "ok"}, status=200)
+
+
+# @method_decorator(csrf_exempt, name='dispatch')
+# class CategoryListView(ListView):
+#     model = Category
+#
+#     def get(self, request, *args, **kwargs):
+#         super().get(request, *args, **kwargs)
+#         response = []
+#         for category in self.object_list.order_by('name'):
+#             response.append(
+#                 {
+#                     "id": category.id,
+#                     "name": category.name
+#                 }
+#             )
+#         return JsonResponse(response, safe=False, status=200)
+
+# class CategoryDetailView(DetailView):
+#     model = Category
+#
+#     def get(self, request, *args, **kwargs):
+#         super().get(request, *args, **kwargs)
+#         category = self.get_object()
+#         return JsonResponse({"id": category.id, "name": category.name}, status=200)
+
+
+# @method_decorator(csrf_exempt, name='dispatch')
+# class CategoryCreateView(CreateView):
+#     model = Category
+#     fields = ["name", "slug"]
+#
+#     def post(self, request, *args, **kwargs):
+#         super().post(request, *args, **kwargs)
+#         data = json.loads(request.body)
+#         try:
+#             category = Category.objects.create(name=data.get("name"), slug=data.get("slug"))
+#         except IntegrityError:
+#             return JsonResponse({"error": "this column does not exist"})
+#         return JsonResponse({"id": category.id, "name": category.name}, status=200)
+
+
+# @method_decorator(csrf_exempt, name='dispatch')
+# class CategoryUpdateView(UpdateView):
+#     model = Category
+#     fields = ["name"]
+#
+#     def post(self, request, *args, **kwargs):
+#         super().post(request, *args, **kwargs)
+#         category_data = json.loads(request.body)
+#         self.object.name = category_data["name"]
+#         self.object.save()
+#         return JsonResponse({"id": self.object.id, "name": self.object.name}, status=200)
+#
+#
+# @method_decorator(csrf_exempt, name='dispatch')
+# class CategoryDeleteView(DeleteView):
+#     model = Category
+#     success_url = "/"
+#
+#     def delete(self, request, *args, **kwargs):
+#         super().delete(request, *args, **kwargs)
+#
+#         return JsonResponse({"status": "ok"}, status=200)
+
+
 def index(request):
     return JsonResponse({"status": "ok"}, status=200)
 
 
-@method_decorator(csrf_exempt, name='dispatch')
-class CategoryListView(ListView):
-    model = Category
-
-    def get(self, request, *args, **kwargs):
-        super().get(request, *args, **kwargs)
-        response = []
-        for category in self.object_list.order_by('name'):
-            response.append(
-                {
-                    "id": category.id,
-                    "name": category.name
-                }
-            )
-        return JsonResponse(response, safe=False, status=200)
+class CategoryListView(ListAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
 
 
-class CategoryDetailView(DetailView):
-    model = Category
-
-    def get(self, request, *args, **kwargs):
-        super().get(request, *args, **kwargs)
-        category = self.get_object()
-        return JsonResponse({"id": category.id, "name": category.name}, status=200)
+class CategoryRetrieveView(RetrieveAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
 
 
-@method_decorator(csrf_exempt, name='dispatch')
-class CategoryCreateView(CreateView):
-    model = Category
-    fields = ["name"]
-
-    def post(self, request, *args, **kwargs):
-        super().post(request, *args, **kwargs)
-        data = json.loads(request.body)
-        try:
-            category = Category.objects.create(name=data.get("name"))
-        except IntegrityError:
-            return JsonResponse({"error": "this column does not exist"})
-        return JsonResponse({"id": category.id, "name": category.name}, status=200)
+class CategoryCreateView(CreateAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
 
 
-@method_decorator(csrf_exempt, name='dispatch')
-class CategoryUpdateView(UpdateView):
-    model = Category
-    fields = ["name"]
-
-    def post(self, request, *args, **kwargs):
-        super().post(request, *args, **kwargs)
-        category_data = json.loads(request.body)
-        self.object.name = category_data["name"]
-        self.object.save()
-        return JsonResponse({"id": self.object.id, "name": self.object.name}, status=200)
+class CategoryUpdateView(UpdateAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategoryUpdateSerializer
 
 
-@method_decorator(csrf_exempt, name='dispatch')
-class CategoryDeleteView(DeleteView):
-    model = Category
-    success_url = "/"
-
-    def delete(self, request, *args, **kwargs):
-        super().delete(request, *args, **kwargs)
-
-        return JsonResponse({"status": "ok"}, status=200)
+class CategoryDeleteView(DestroyAPIView):
+    queryset = Category.objects.all()
 
 
 class AdRetrieveView(RetrieveAPIView):

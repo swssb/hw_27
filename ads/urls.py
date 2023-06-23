@@ -1,13 +1,14 @@
 from django.urls import path
 
-from ads.views import CategoryListView, CategoryDetailView, CategoryUpdateView, AdUpdateView, \
+from ads.views import CategoryListView, CategoryUpdateView, AdUpdateView, \
     CategoryDeleteView, AdDeleteView, AdCreateView, CategoryCreateView, AdImageView, AdSearchView, AdRetrieveView, \
-    SelectionCreateView, SelectionListView, SelectionRetrieveView, SelectionUpdateView, SelectionDeleteView
+    SelectionCreateView, SelectionListView, SelectionRetrieveView, SelectionUpdateView, SelectionDeleteView, \
+    CategoryRetrieveView
 
 urlpatterns = [
     path("cat/", CategoryListView.as_view()),
     path("cat/create/", CategoryCreateView.as_view()),
-    path("cat/<int:pk>/", CategoryDetailView.as_view()),
+    path("cat/<int:pk>/", CategoryRetrieveView.as_view()),
     path("cat/<int:pk>/update/", CategoryUpdateView.as_view()),
     path("cat/<int:pk>/delete/", CategoryDeleteView.as_view()),
 
@@ -23,5 +24,5 @@ urlpatterns = [
     path("selection/", SelectionListView.as_view()),
     path("selection/<int:pk>/", SelectionRetrieveView.as_view()),
     path("selection/<int:pk>/update/", SelectionUpdateView.as_view()),
-    path("selection/<int:pk/delete/", SelectionDeleteView.as_view()),
+    path("selection/<int:pk>/delete/", SelectionDeleteView.as_view()),
 ]
