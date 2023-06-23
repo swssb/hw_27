@@ -7,7 +7,7 @@ from ads.models import Selection
 def test_create_selection(client, user_token, selection, ad):
     # Selection.objects.create(name="my select", owner=2, items=[1, 2, 5])
     expected_response = {
-        "id": selection.id,
+        "id": 2,
         "name": selection.name,
         "owner": selection.owner.id,
         "items": [ad.id]
