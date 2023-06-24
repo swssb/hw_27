@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import UpdateView
+from drf_spectacular.utils import extend_schema
 from rest_framework.generics import ListAPIView, RetrieveAPIView, UpdateAPIView, DestroyAPIView, CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 
@@ -193,54 +194,54 @@ from ads.serializers import AdListSerializer, AdUpdateSerializer, AdCreateSerial
 def index(request):
     return JsonResponse({"status": "ok"}, status=200)
 
-
+@extend_schema(description="Show all categories", summary='Category List')
 class CategoryListView(ListAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
-
+@extend_schema(description="Show ONE categorie", summary='Category Detail')
 class CategoryRetrieveView(RetrieveAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
-
+@extend_schema(description="Create new category", summary='Create Category')
 class CategoryCreateView(CreateAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
-
+@extend_schema(description="Update category by ID", summary='Update Category')
 class CategoryUpdateView(UpdateAPIView):
     queryset = Category.objects.all()
     serializer_class = CategoryUpdateSerializer
 
-
+@extend_schema(description="Delete category by ID", summary='Delete Category')
 class CategoryDeleteView(DestroyAPIView):
     queryset = Category.objects.all()
 
-
+@extend_schema(description="Show ONE ad", summary='Ad Detail')
 class AdRetrieveView(RetrieveAPIView):
     queryset = Ad.objects.all()
     serializer_class = AdListSerializer
     permission_classes = [IsAuthenticated]
 
-
+@extend_schema(description="Create new ad", summary='Create Ad')
 class AdCreateView(CreateAPIView):
     queryset = Ad.objects.all()
     serializer_class = AdCreateSerializer
 
-
+@extend_schema(description="Update Ad by ID", summary='Update Ad')
 class AdUpdateView(UpdateAPIView):
     queryset = Ad.objects.all()
     serializer_class = AdUpdateSerializer
     permission_classes = [IsAuthenticated, AdChangePermission]
 
-
+@extend_schema(description="Delete Ad by ID", summary='Delete Ad')
 class AdDeleteView(DestroyAPIView):
     queryset = Ad.objects.all()
     serializer_class = AdCreateSerializer
     permission_classes = [IsAuthenticated, AdChangePermission]
 
-
+@extend_schema(description="Add image to Ad", summary='Image Ad')
 @method_decorator(csrf_exempt, name='dispatch')
 class AdImageView(UpdateView):
     model = Ad
@@ -260,7 +261,10 @@ class AdImageView(UpdateView):
             "image": self.object.image.url
         }, status=200)
 
-
+@extend_schema(
+    description="Show all ads, or search by args(cat, text, location, price_from, price_to",
+    summary='Search Ads'
+)
 class AdSearchView(ListAPIView):
     queryset = Ad.objects.all()
     serializer_class = AdListSerializer
@@ -289,29 +293,30 @@ class AdSearchView(ListAPIView):
             self.queryset = self.queryset.filter(price__range=(price_from, price_to))
         return super().get(request, *args, **kwargs)
 
-
+@extend_schema(description="Create new Selection", summary='Selection create')
 class SelectionCreateView(CreateAPIView):
     queryset = Selection.objects.all()
     serializer_class = SelectionCreateSerializer
     permission_classes = [IsAuthenticated]
 
 
+@extend_schema(description="Show all selections", summary='Selection List')
 class SelectionListView(ListAPIView):
     queryset = Selection.objects.all()
     serializer_class = SelectionListSerializer
 
-
+@extend_schema(description="Show ONE selection", summary='Selection Detail')
 class SelectionRetrieveView(RetrieveAPIView):
     queryset = Selection.objects.all()
     serializer_class = SelectionRetrieveSerializer
 
-
+@extend_schema(description="Update selection by ID", summary='Selection Update')
 class SelectionUpdateView(UpdateAPIView):
     queryset = Selection.objects.all()
     serializer_class = SelectionCreateSerializer
     permission_classes = [IsAuthenticated, SelectionChangePermission]
 
-
+@extend_schema(description="Delete selection by ID", summary='Selection Delete')
 class SelectionDeleteView(DestroyAPIView):
     queryset = Selection.objects.all()
     serializer_class = SelectionCreateSerializer
